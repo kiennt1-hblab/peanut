@@ -2,9 +2,11 @@ package usecase
 
 import (
 	"context"
+	"mime/multipart"
 	"peanut/config"
 	"peanut/domain"
 	"peanut/pkg/apierrors"
+	"peanut/pkg/filemanager"
 	"peanut/repository"
 	"time"
 )
@@ -12,6 +14,7 @@ import (
 type ContentUsecase interface {
 	GetContents(ctx context.Context) ([]domain.Content, error)
 	CreateContent(ctx context.Context, content domain.CreateContent, filepath string) error
+	GgStorage(ctx context.Context, file *multipart.FileHeader) (string, error)
 }
 
 type contentUsecase struct {
@@ -47,6 +50,21 @@ func (c contentUsecase) CreateContent(ctx context.Context, content domain.Create
 		return
 	}
 	return nil
+}
+
+func (c contentUsecase) GgStorage(ctx context.Context, file *multipart.FileHeader) (string, error) {
+	// open file
+	fileContent, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer fileContent.Close()
+
+	path, err := filemanager.UploadGgStorage(fileContent, "")
+	if err != nil {
+		return "", err
+	}
+	return path, nil
 }
 
 func NewContentUsecase(repo repository.ContentRepo) ContentUsecase {

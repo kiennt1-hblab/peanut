@@ -8,6 +8,7 @@ import (
 	"peanut/config"
 	"peanut/domain"
 	"peanut/pkg/filemanager"
+	"peanut/pkg/response"
 	"peanut/repository"
 	"peanut/usecase"
 )
@@ -106,4 +107,33 @@ func (c *ContentController) CreateContent(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": http.StatusText(http.StatusOK),
 	})
+}
+
+func (c *ContentController) GgStorage(ctx *gin.Context) {
+	file, _ := ctx.FormFile("file")
+
+	if int(file.Size) > config.MaxSizeUpload {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "file size is too big!",
+		})
+		return
+	}
+
+	extension := filepath.Ext(file.Filename)
+	extensions := []string{".jpeg", ".png", ".jpg"}
+	if !filemanager.CheckExtensionAvailable(extension, extensions) {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "file type not allow",
+		})
+		return
+	}
+
+	path, err := c.Content.GgStorage(ctx, file)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	response.OK(ctx, path)
 }

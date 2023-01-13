@@ -85,6 +85,7 @@ func SetupServer(s *gorm.DB) Server {
 			contents.GET("", contentCtrl.ListContent)
 			contents.POST("", contentCtrl.CreateContent)
 		}
+		v1.POST("gg-storage", contentCtrl.GgStorage)
 	}
 
 	// health check
