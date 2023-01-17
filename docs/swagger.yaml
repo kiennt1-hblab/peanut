@@ -200,6 +200,92 @@ paths:
       summary: content
       tags:
       - Content
+  /gg-storage:
+    post:
+      consumes:
+      - application/json
+      description: google storage
+      parameters:
+      - description: file
+        in: formData
+        name: File
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: upload file to google storage
+      tags:
+      - Google-storage
+  /gg-storage/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: delete file in google storage
+      parameters:
+      - description: file
+        in: formData
+        name: File
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: delete file in google storage
+      tags:
+      - Google-storage
+    get:
+      consumes:
+      - application/json
+      description: download file in google storage
+      parameters:
+      - description: file
+        in: formData
+        name: File
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: download file from Google storage
+      tags:
+      - Google-storage
   /login:
     post:
       consumes:
