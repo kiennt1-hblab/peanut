@@ -15,6 +15,7 @@ type ContentUsecase interface {
 	GetContents(ctx context.Context) ([]domain.Content, error)
 	CreateContent(ctx context.Context, content domain.CreateContent, filepath string) error
 	GgStorage(ctx context.Context, file *multipart.FileHeader) (string, error)
+	DeleteGCS(ctx context.Context, name string) error
 }
 
 type contentUsecase struct {
@@ -65,6 +66,14 @@ func (c contentUsecase) GgStorage(ctx context.Context, file *multipart.FileHeade
 		return "", err
 	}
 	return path, nil
+}
+
+func (c contentUsecase) DeleteGCS(ctx context.Context, name string) error {
+	err := filemanager.DeleteGCS(name)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewContentUsecase(repo repository.ContentRepo) ContentUsecase {

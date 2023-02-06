@@ -109,6 +109,18 @@ func (c *ContentController) CreateContent(ctx *gin.Context) {
 	})
 }
 
+// GgStorage godoc
+//
+//	@Summary		upload file to google storage
+//	@Description	google storage
+//	@Tags			Google-storage
+//	@Accept			json
+//	@Produce		json
+//	@Param			File	formData	file	true	"file"
+//	@Success		200		{object}	domain.Response
+//	@Failure		400		{object}	domain.ErrorResponse
+//	@Failure		500		{object}	domain.ErrorResponse
+//	@Router			/gg-storage [post]
 func (c *ContentController) GgStorage(ctx *gin.Context) {
 	file, _ := ctx.FormFile("file")
 
@@ -136,4 +148,64 @@ func (c *ContentController) GgStorage(ctx *gin.Context) {
 		return
 	}
 	response.OK(ctx, path)
+}
+
+// Download godoc
+//
+//	@Summary		download file from Google storage
+//	@Description	download file in google storage
+//	@Tags			Google-storage
+//	@Accept			json
+//	@Produce		json
+//	@Param			File	formData	file	true	"file"
+//	@Success		200		{object}	string
+//	@Failure		400		{object}	domain.ErrorResponse
+//	@Failure		500		{object}	domain.ErrorResponse
+//	@Router			/gg-storage/{name} [get]
+func (c *ContentController) Download(ctx *gin.Context) {
+	fileName := ctx.Param("name")
+	url := config.PublicUrlGgStorage + "/" + config.BucketUpload + "/" + fileName
+
+	res, err := http.Get(url)
+	if err != nil || res.StatusCode != http.StatusOK {
+		ctx.Status(http.StatusServiceUnavailable)
+		return
+	}
+
+	reader := res.Body
+	defer reader.Close()
+	contentLength := res.ContentLength
+	contentType := res.Header.Get("Content-Type")
+
+	extraHeaders := map[string]string{
+		"Content-Disposition": `attachment; filename="` + fileName + `.png"`,
+	}
+
+	ctx.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
+}
+
+// DeleteGCS godoc
+//
+//	@Summary		delete file in google storage
+//	@Description	delete file in google storage
+//	@Tags			Google-storage
+//	@Accept			json
+//	@Produce		json
+//	@Param			File	formData	file	true	"file"
+//	@Success		200		{object}	domain.Response
+//	@Failure		400		{object}	domain.ErrorResponse
+//	@Failure		500		{object}	domain.ErrorResponse
+//	@Router			/gg-storage/{name} [delete]
+func (c *ContentController) DeleteGCS(ctx *gin.Context) {
+	name := ctx.Param("name")
+	err := c.Content.DeleteGCS(ctx, name)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": http.StatusText(http.StatusOK),
+	})
 }

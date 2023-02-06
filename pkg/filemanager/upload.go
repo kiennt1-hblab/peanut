@@ -19,27 +19,37 @@ func CheckExtensionAvailable(ext string, listExt []string) bool {
 	return ary.InArray(ext, listExt)
 }
 
+func defineGgStorage(ctx context.Context) (*storage.Client, error) {
+	// Creating a Client with file json Credentials
+	client, err := storage.NewClient(ctx, option.WithCredentialsFile(config.GgStorageCredential))
+	if err != nil {
+		return nil, fmt.Errorf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
+	return client, nil
+}
+
 func UploadGgStorage(fileContent io.Reader, nameFile string) (string, error) {
 	// defines Context
 	ctx := context.Background()
+
+	client, err := defineGgStorage(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	// bucket name to upload
+	bucket := config.BucketUpload
 
 	// new name to upload
 	if nameFile == "" {
 		nameFile = "_NoName"
 	}
 	nameUpload := uuid.NewString() + nameFile
-
-	// bucket name to upload
-	bucket := config.BucketUpload
-	// Creating a Client with file json Credentials
-	client, err := storage.NewClient(ctx, option.WithCredentialsFile(config.GgStorageCredential))
-	if err != nil {
-		return "", fmt.Errorf("storage.NewClient: %v", err)
-	}
-	defer client.Close()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel()
 
 	// Upload an object with storage.Writer.
 	wc := client.Bucket(bucket).Object(nameUpload).NewWriter(ctx)
@@ -51,9 +61,30 @@ func UploadGgStorage(fileContent io.Reader, nameFile string) (string, error) {
 	}
 
 	// get public url image
-	url, err := url.Parse(config.PublicUrlGgStorage + "/" + bucket + "/" + wc.Attrs().Name)
+	urlReturn, err := url.Parse(config.PublicUrlGgStorage + "/" + bucket + "/" + wc.Attrs().Name)
 	if err != nil {
 		return "", err
 	}
-	return url.String(), nil
+	return urlReturn.String(), nil
+}
+
+func DeleteGCS(nameFile string) error {
+	// defines Context
+	ctx := context.Background()
+
+	client, err := defineGgStorage(ctx)
+	if err != nil {
+		return err
+	}
+
+	// bucket name to upload
+	bucket := config.BucketUpload
+
+	// delete file
+	err = client.Bucket(bucket).Object(nameFile).Delete(ctx)
+	if err != nil {
+		return fmt.Errorf("Object(%q).Delete: %v", nameFile, err)
+	}
+
+	return nil
 }
