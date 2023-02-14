@@ -40,7 +40,10 @@ func main() {
 	server := infra.SetupServer(dbClient)
 	infra.Migration(dbClient)
 
-	server.Router.Run(":8080")
+	err := server.Router.Run(":8080")
+	if err != nil {
+		log.Fatal("Start fail")
+	}
 }
 
 func dbConnect() *gorm.DB {

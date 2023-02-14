@@ -8,8 +8,14 @@ import (
 
 func ValidateFunction() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("passwordAllow", passwordAllow)
-		v.RegisterValidation("usernameAllow", usernameAllow)
+		err := v.RegisterValidation("passwordAllow", passwordAllow)
+		if err != nil {
+			return
+		}
+		err = v.RegisterValidation("usernameAllow", usernameAllow)
+		if err != nil {
+			return
+		}
 	}
 }
 
