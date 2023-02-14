@@ -14,7 +14,5 @@ func Migration(db *gorm.DB) {
 	)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
-	return
 }

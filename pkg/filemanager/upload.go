@@ -27,7 +27,7 @@ func defineGgStorage(ctx context.Context) (*storage.Client, error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	_, cancel := context.WithTimeout(ctx, time.Second*50)
 	defer cancel()
 
 	return client, nil

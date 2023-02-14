@@ -16,7 +16,6 @@ import (
 )
 
 var ctx context.Context
-var db *gorm.DB
 var userRepo *mock.MockUserRepo
 var todoRepo *mock.MockTodoRepo
 var contentRepo *mock.MockContentRepo
