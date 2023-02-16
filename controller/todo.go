@@ -78,7 +78,6 @@ func (c *TodoController) CreateTodo(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": http.StatusText(http.StatusCreated),
 	})
-	return
 }
 
 // UpdateTodo godoc
