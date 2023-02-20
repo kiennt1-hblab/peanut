@@ -1,0 +1,35 @@
+name: Study ci
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: Test
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.x'
+      - name: Make envfile
+        run: echo "${{ vars.ENV_FILE }}" > .env
+      - name: Install dependencies
+        run: go get .
+#      - name: Build
+#        run: go build -v ./...
+      - name: Test with the Go CLI
+        run: go test ./usecase/
+  vulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # - uses: actions/setup-go@v3
+      #   with:
+      #     go-version: ^1.19
+      - name: Scan for Vulnerabilities in Code
+        uses: Templum/govulncheck-action@v0.0.9
+        with:
+          go-version: 1.19
+          vulncheck-version: latest
+          package: ./...
+          fail-on-vuln: true
